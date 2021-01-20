@@ -39,5 +39,6 @@ void UMainAnimInstance::UpdateAnimationProperties() {
 				bIsAccelerating = false;
 			}
 		}
+		//
 	}
 }
