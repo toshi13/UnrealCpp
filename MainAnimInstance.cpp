@@ -5,6 +5,7 @@
 #include "MainCharacter.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UMainAnimInstance::NativeInitializeAnimation() {
 	Super::NativeInitializeAnimation();
@@ -16,7 +17,7 @@ void UMainAnimInstance::NativeInitializeAnimation() {
 	}
 }
 
-void UMainAnimInstance::UpdateAnimationProperties() {
+void UMainAnimInstance::UpdateAnimationProperties(float DeltaTime) {
 	if (Pawn == nullptr) {
 		Pawn = TryGetPawnOwner();
 	}
@@ -27,6 +28,14 @@ void UMainAnimInstance::UpdateAnimationProperties() {
 		MovementSpeed = LateralSpeed.Size();
 
 		bIsInAir = Pawn->GetMovementComponent()->IsFalling();
+
+		FRotator Rotation = Pawn->GetActorRotation();
+		FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(RotationLastFrame, Rotation);
+		float Target = Delta.Yaw / DeltaTime;
+		float Interp = FMath::FInterpTo(YawDelta, Target, DeltaTime, 6.0f);
+		YawDelta = FMath::Clamp(Interp, -90.f, 90.f);
+
+		RotationLastFrame = Rotation;
 
 		if (Main == nullptr) {
 			Main = Cast<AMainCharacter>(Pawn);
